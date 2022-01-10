@@ -4,10 +4,7 @@ import java.io.*;
 import java.util.*;
 
 import org.apache.poi.ss.usermodel.*;
-import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-
-import java.sql.Array;
 import java.util.ArrayList;
 
 public class Main {
@@ -18,61 +15,45 @@ public class Main {
         RequestGenerator generator = new RequestGenerator();
         generator.generateProcess();
         data = generator.getP();
-        System.out.println("generated");
+//       data = setReadyqueue(generator.getP());
         readingExcel();
+        System.out.println("time unit : "+ Algorithm.timeUnit);
 
-        int choose;
-        Scanner scanner = new Scanner(System.in);
-        System.out.println("choose the scheduling methode:\n" + "1. FIFO\n" + "2. Preemptive SJF\n" + "3. Non-Preemptive SJF\n"
-                + "4. RR (with specified time quantum)\n" + "5. Priority with preemption\n" + "6. Non-Preemptive priority\n" +
-                "7. Exit");
+        do {
+            int choose;
+            Scanner scanner = new Scanner(System.in);
+            System.out.println("\n ----------------------------------------------------------------------------------------------------------");
+            System.out.println("choose the scheduling methode:\n" + "1. FIFO\n" + "2. Preemptive SJF\n" + "3. Non-Preemptive SJF\n"
+                    + "4. RR (with specified time quantum)\n" + "5. Priority with preemption\n" + "6. Non-Preemptive priority\n" +
+                    "7. Exit");
 
-        choose = scanner.nextInt();
-        switch (choose) {
-            case 1:
-                Algorithm.fifo_scheduling(data);
-                break;
-            case 2:
-                Algorithm.preemptive_sjf(data);
-                break;
-            case 3:
-                Algorithm.nonPreemptive_sjf(data);
-                break;
-            case 4:
-                Algorithm.roundRobin();
-                break;
-            case 5:
-                Algorithm.preemption_priority();
-                break;
-            case 6:
-                Algorithm.nonPreemptive_priority();
-                break;
-            case 7:
-                System.exit(0);
-        }
+            choose = scanner.nextInt();
+            switch (choose) {
+                case 1:
+                    Algorithm.fifo_scheduling(data);
+                    break;
+                case 2:
+                    Algorithm.preemptive_sjf(data);
+                    break;
+                case 3:
+                    Algorithm.nonPreemptive_sjf(data);
+                    break;
+                case 4:
+                    Algorithm.roundRobin(data);
+                    break;
+                case 5:
+                    Algorithm.preemptive_priority(data);
+                    break;
+                case 6:
+                    Algorithm.nonPreemptive_priority(data);
+                    break;
+                case 7:
+                    System.exit(0);
+            }
+        }while(true);
     }
 
-    // the function that measures time
-    public static void given_function() {
-        int temp = 0;
-        for (int i = 0; i < 10000; i++) {
-            if (i % 2 == 0)
-                temp = i / 2;
-            else
-                temp = 2 * i;
-        }
-    }
 
-    public static long time_measurement() {
-
-        long startTime = System.currentTimeMillis();
-        //.out.println("start time : " + startTime);
-        given_function();
-        long endTime = System.currentTimeMillis();
-        //System.out.println("end time : " + endTime);
-        long duration = (endTime - startTime);
-        return duration;
-    }
 
     // reads the entire Excel file
     public static ArrayList<Process> readingExcel() {
@@ -165,18 +146,22 @@ public class Main {
         return value;
     }
 
+    public static ArrayList<Process> setReadyqueue(ArrayList<Process> processes) {
+        ArrayList<Process> readyProcesses = new ArrayList<>();
+        Queue<Process> ready  = new PriorityQueue<> (100);
 
-    //// !should be in process class! ////
-    public static ArrayList<Process> sorting(ArrayList<Process> arrayList) {
-        int min = arrayList.get(0).getArrivalTime();
-        for (int i = 1; i < arrayList.size(); i++) {
-            if (arrayList.get(i).getArrivalTime() < min) {
-                Process pro = arrayList.get(i);
-                // ..
-            }
+        for (int i=0; i<100; i++){
+            ready.add(processes.get(i));
         }
-        return arrayList;
+        readyProcesses.add(ready.remove());
+
+        for (int j=100; ready.size()!=0; j++){
+            ready.add(processes.get(j));
+            readyProcesses.add(ready.remove());
+        }
+        return readyProcesses;
     }
+
 }
 
 
